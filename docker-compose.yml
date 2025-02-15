@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bottaxi:
+    build: .
+    container_name: bottaxi
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: npm start  # ou o comando necessário para iniciar o bot
