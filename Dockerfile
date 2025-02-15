@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     wget \
     ca-certificates \
-    libxkbcommon0 \  # Adicionado
-    libnspr4 \        # Adicionado
-    libgdk-pixbuf2.0-0 \  # Adicionado
+    libxkbcommon0 \
+    libnspr4 \
+    libgdk-pixbuf2.0-0
 
 # Configura o diretório de trabalho
 WORKDIR /app
