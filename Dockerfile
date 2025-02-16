@@ -10,8 +10,7 @@ RUN apt-get update && apt-get install -y \
     libx11-xcb1 libxcomposite1 libxrandr2 libgbm1 \
     libasound2 lsb-release xdg-utils wget ca-certificates \
     libxkbcommon0 libnspr4 libgdk-pixbuf2.0-0 \
-    libXdamage1 \
-    --no-install-recommends && \
+    libxdamage1 --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*  # Limpa o cache do apt para reduzir o tamanho da imagem
 
 # Define o diretório de trabalho
