@@ -4,7 +4,10 @@ const { processarMensagem } = require('./src/handlers');
 // Criando o cliente do WhatsApp com autenticação persistente
 const client = new Client({
     authStrategy: new LocalAuth(), // Mantém a sessão salva no servidor
-    puppeteer: { headless: true }
+    puppeteer: { 
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Evita problemas de sandbox no Puppeteer
+    }
 });
 
 // Evento quando o QR Code for gerado (apenas para referência)
@@ -19,8 +22,14 @@ client.on('ready', () => {
 
 // Lidando com mensagens recebidas
 client.on('message', async (message) => {
-    await processarMensagem(client, message);
+    try {
+        await processarMensagem(client, message);
+    } catch (error) {
+        console.error('Erro ao processar mensagem:', error);
+    }
 });
 
 // Iniciando o bot
-client.initialize();
+client.initialize().catch(error => {
+    console.error('Erro ao iniciar o bot:', error);
+});
