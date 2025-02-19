@@ -22,7 +22,7 @@ const validarEndereco = (endereco) => {
 
 // Função para iniciar o atendimento
 async function iniciarAtendimento(message) {
-    message.reply('🌞 Bom dia! Sou o assistente virtual da [Nome da Empresa de Táxi].');
+    message.reply('🌞 Bom dia! Sou o assistente virtual da Bot tax.');
     message.reply('Por favor, me diga como você gostaria de ser chamado para te atendermos melhor.');
 }
 
@@ -32,12 +32,8 @@ async function processarMensagem(client, message) {
 
     // Se ainda não foi iniciado o atendimento, pedimos o nome do cliente
     if (!dadosCliente.nome) {
-        if (dadosCliente.partida === '') {
-            await iniciarAtendimento(message);
-        } else {
-            dadosCliente.nome = texto;
-            message.reply('Agora, por favor, envie o endereço de partida (Rua, Número, Bairro, Cidade - Cuiabá ou Várzea Grande).');
-        }
+        dadosCliente.nome = texto;  // Armazena o nome do cliente
+        message.reply('Agora, por favor, envie o endereço de partida (Rua, Número, Bairro, Cidade - Cuiabá ou Várzea Grande).');
         return;
     }
 
