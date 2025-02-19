@@ -1,4 +1,11 @@
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 const { enviarParaGrupo } = require('./bot');
+
+// Criando uma instância do cliente
+const client = new Client({
+    authStrategy: new LocalAuth(),
+});
 
 // Variáveis para armazenar as informações da corrida
 let dadosCliente = { partida: '', chegada: '', pagamento: '', nome: '', telefone: '', confirmado: false };
@@ -9,7 +16,7 @@ async function processarMensagem(client, message) {
 
     // Mensagem inicial
     if (texto.toLowerCase() === 'olá' || texto.toLowerCase() === 'bom dia' || texto.toLowerCase() === 'boa tarde') {
-        message.reply('Olá! Sou o assistente virtual da Bot taxi. Como posso ajudar?');
+        message.reply('Olá! Sou o assistente virtual da [Nome da Empresa de Táxi]. Como posso ajudar?');
         message.reply('Por favor, informe o nome com o qual deseja ser atendido.');
         return;
     }
@@ -80,5 +87,37 @@ async function processarMensagem(client, message) {
         }
     }
 }
+
+// Listar os grupos onde o bot está adicionado
+client.on('ready', () => {
+    console.log('Cliente WhatsApp pronto!');
+
+    // Listar todos os grupos e seus respectivos IDs
+    client.getChats().then(chats => {
+        chats.forEach(chat => {
+            if (chat.isGroup) {
+                console.log(`Nome do grupo: ${chat.name} | ID do grupo: ${chat.id._serialized}`);
+            }
+        });
+    });
+});
+
+// Inicialização do QR code para o login
+client.on('qr', (qr) => {
+    qrcode.generate(qr, { small: true });
+});
+
+// Evento que será disparado quando o cliente estiver autenticado
+client.on('authenticated', () => {
+    console.log('Cliente autenticado com sucesso!');
+});
+
+// Evento que será disparado em caso de erro
+client.on('auth_failure', (msg) => {
+    console.error('Falha na autenticação:', msg);
+});
+
+// Inicia o cliente
+client.initialize();
 
 module.exports = { processarMensagem };
