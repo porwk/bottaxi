@@ -1,12 +1,16 @@
 {
-  "name": "whatsapp-bot",
+  "name": "bottaxi",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Bot para gerenciamento de corridas de táxi",
+  "main": "index.js",  // Ou o nome do arquivo principal do seu projeto
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js"  // Comando para rodar o bot
   },
   "dependencies": {
-    "whatsapp-web.js": "^1.19.0",
-    "qrcode-terminal": "^0.12.0"
-  }
+    "whatsapp-web.js": "^1.17.0",
+    "qrcode-terminal": "^0.12.0",
+    "puppeteer-core": "^19.0.0"  // Se necessário, ajuste a versão
+  },
+  "author": "Seu Nome",
+  "license": "MIT"
 }
