@@ -1,14 +1,56 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const { Client } = require('whatsapp-web.js');
 const { enviarParaGrupo } = require('./bot');
-
-// Criando uma instância do cliente
-const client = new Client({
-    authStrategy: new LocalAuth(),
-});
 
 // Variáveis para armazenar as informações da corrida
 let dadosCliente = { partida: '', chegada: '', pagamento: '', nome: '', telefone: '', confirmado: false };
+
+// Cria um cliente para o WhatsApp
+const client = new Client();
+
+let grupoId = null;
+
+// Evento de QR Code para escanear
+client.on('qr', (qr) => {
+    console.log('QR Code recebido:', qr);
+    // Você pode usar um serviço como o [https://api.qrserver.com/v1/create-qr-code/](https://api.qrserver.com/v1/create-qr-code/) para exibir o QR code
+});
+
+// Evento de cliente pronto
+client.on('ready', () => {
+    console.log('Cliente WhatsApp pronto!');
+    
+    // Listar todos os grupos e seus respectivos IDs
+    client.getChats().then(chats => {
+        chats.forEach(chat => {
+            if (chat.isGroup) {
+                console.log(`Nome do grupo: ${chat.name} | ID do grupo: ${chat.id._serialized}`);
+                
+                // Aqui você escolhe qual grupo utilizar, por exemplo, o primeiro grupo da lista
+                grupoId = chat.id._serialized;  // Defina o grupo ID conforme necessário
+            }
+        });
+    });
+});
+
+// Função para enviar a corrida para o grupo de motoristas/admins
+async function enviarParaGrupo(client, mensagem) {
+    try {
+        if (grupoId) {
+            // Verificar se o ID do grupo é válido
+            const grupo = await client.getChatById(grupoId);
+            if (grupo) {
+                await grupo.sendMessage(mensagem);
+                console.log('📨 Mensagem enviada ao grupo de motoristas.');
+            } else {
+                console.log('❌ Grupo não encontrado, ID inválido.');
+            }
+        } else {
+            console.log('❌ ID do grupo não encontrado.');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao enviar mensagem para o grupo:', error);
+    }
+}
 
 // Processa cada mensagem recebida
 async function processarMensagem(client, message) {
@@ -88,36 +130,6 @@ async function processarMensagem(client, message) {
     }
 }
 
-// Listar os grupos onde o bot está adicionado
-client.on('ready', () => {
-    console.log('Cliente WhatsApp pronto!');
-
-    // Listar todos os grupos e seus respectivos IDs
-    client.getChats().then(chats => {
-        chats.forEach(chat => {
-            if (chat.isGroup) {
-                console.log(`Nome do grupo: ${chat.name} | ID do grupo: ${chat.id._serialized}`);
-            }
-        });
-    });
-});
-
-// Inicialização do QR code para o login
-client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
-});
-
-// Evento que será disparado quando o cliente estiver autenticado
-client.on('authenticated', () => {
-    console.log('Cliente autenticado com sucesso!');
-});
-
-// Evento que será disparado em caso de erro
-client.on('auth_failure', (msg) => {
-    console.error('Falha na autenticação:', msg);
-});
-
-// Inicia o cliente
 client.initialize();
 
 module.exports = { processarMensagem };
