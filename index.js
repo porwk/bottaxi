@@ -1,44 +1,64 @@
+const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const { processarMensagem } = require('./src/handlers');
+const qrcode = require('qrcode'); // Dependência para gerar o QR Code como imagem
 
-// Criando o cliente do WhatsApp com autenticação persistente
+const app = express();
+const PORT = 3000;
+
+// Criando o cliente do WhatsApp
 const client = new Client({
-    authStrategy: new LocalAuth({ dataPath: './auth' }), // Garante que a sessão seja armazenada corretamente
-    puppeteer: { 
+    authStrategy: new LocalAuth(),
+    puppeteer: {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
 
-// Evento quando o QR Code for gerado (apenas para referência)
+// Rota para verificar se o bot está rodando
+app.get('/', (req, res) => {
+    res.send('🤖 Bot do WhatsApp está rodando!');
+});
+
+// Rota para exibir o QR Code
+app.get('/qr', (req, res) => {
+    // Gerar o QR Code como imagem e enviá-la para o navegador
+    client.on('qr', (qr) => {
+        qrcode.toDataURL(qr, (err, url) => {
+            if (err) {
+                console.error('Erro ao gerar o QR Code', err);
+                return res.status(500).send('Erro ao gerar o QR Code');
+            }
+            res.send(`<img src="${url}" alt="QR Code"/>`);
+        });
+    });
+});
+
+// Inicializa o servidor Express
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
+
+// Evento quando o QR Code for gerado
 client.on('qr', (qr) => {
-    console.clear(); // Limpa o terminal para evitar poluição visual
-    console.log('📲 QR Code gerado! Escaneie no seu WhatsApp.');
+    console.log('QR Code gerado! Escaneie no seu WhatsApp.');
 });
 
 // Quando o bot estiver pronto para uso
 client.on('ready', () => {
-    console.log('✅ 🤖 Bot está pronto e operando!');
+    console.log('🤖 Bot está pronto e operando!');
 });
 
 // Lidando com mensagens recebidas
 client.on('message', async (message) => {
     try {
-        console.log(`📩 Mensagem recebida de ${message.from}: ${message.body}`);
         await processarMensagem(client, message);
     } catch (error) {
-        console.error('❌ Erro ao processar mensagem:', error);
+        console.error('Erro ao processar mensagem:', error);
     }
-});
-
-// Captura erros globais para evitar falhas inesperadas
-client.on('disconnected', (reason) => {
-    console.log(`⚠️ Bot desconectado: ${reason}`);
-    console.log('Tentando reconectar...');
-    client.initialize();
 });
 
 // Iniciando o bot
 client.initialize().catch(error => {
-    console.error('❌ Erro ao iniciar o bot:', error);
+    console.error('Erro ao iniciar o bot:', error);
 });
